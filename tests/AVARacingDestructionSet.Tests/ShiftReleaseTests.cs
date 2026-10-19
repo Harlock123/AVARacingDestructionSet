@@ -1,0 +1,33 @@
+using Avalonia.Input;
+using AVARacingDestructionSet.Engine;
+
+namespace AVARacingDestructionSet.Tests;
+
+/// <summary>With the keyboard option shift:both_capslock_cancel, X11 names a Shift's release CapsLock.</summary>
+public sealed class ShiftReleaseTests
+{
+    [Fact]
+    public void A_shift_let_go_as_caps_lock_is_let_go()
+    {
+        var input = new InputHandler();
+        input.OnKeyDown(Key.LeftShift, PhysicalKey.ShiftLeft);
+        input.OnKeyDown(Key.RightShift, PhysicalKey.ShiftRight);
+        Assert.True(input.Has(Key.LeftShift) && input.Has(Key.RightShift));
+        input.OnKeyUp(Key.CapsLock, PhysicalKey.ShiftLeft);
+        Assert.False(input.Has(Key.LeftShift));
+        Assert.True(input.Has(Key.RightShift));
+        input.OnKeyUp(Key.CapsLock, PhysicalKey.ShiftRight);
+        Assert.False(input.Has(Key.RightShift));
+        (input as IDisposable)?.Dispose();
+    }
+
+    [Fact]
+    public void Player_twos_weapon_on_left_shift_stops_firing_when_the_shift_comes_up_as_caps_lock()
+    {
+        using var input = new InputHandler();
+        input.OnKeyDown(Key.LeftShift, PhysicalKey.ShiftLeft);
+        Assert.True(input.Player(1).Fire);
+        input.OnKeyUp(Key.CapsLock, PhysicalKey.ShiftLeft);
+        Assert.False(input.Player(1).Fire);
+    }
+}
